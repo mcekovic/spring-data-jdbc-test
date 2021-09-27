@@ -18,14 +18,14 @@ class SpringDataJdbcApplicationTests {
 
 	@Test @Order(1)
 	void book1IsCreated() {
-		var book = new Book(null, "Domain-Driven Design", "Eric Evans");
+		var book = new Book(null, "Domain-Driven Design", "Eric Evans", new BookSections(new BookSection(1, "Introduction", 10)));
 
 		saveAndAssertBook(book);
 	}
 
 	@Test @Order(2)
 	void book2IsCreated() {
-		var book = new Book(null, "Refactoring", "Martin Fowler");
+		var book = new Book(null, "Refactoring", "Martin Fowler", new BookSections(new BookSection(1, "Introduction", 5)));
 
 		saveAndAssertBook(book);
 	}
@@ -47,7 +47,7 @@ class SpringDataJdbcApplicationTests {
 			.returnResult(Book.class)
 			.getResponseBody().blockFirst();
 
-		var updatedBook = new Book(book.id(), book.title() + ": Tackling Complexity in the Heart of Software", book.author());
+		var updatedBook = book.withTitle(book.title() + ": Tackling Complexity in the Heart of Software");
 
 		saveAndAssertBook(updatedBook);
 	}
@@ -59,7 +59,7 @@ class SpringDataJdbcApplicationTests {
 			.returnResult(Book.class)
 			.getResponseBody().blockFirst();
 
-		var updatedBook = new Book(book.id(), book.title() + ": Improving the Design of Existing Code", book.author());
+		var updatedBook = book.withTitle(book.title() + ": Improving the Design of Existing Code");
 
 		saveAndAssertBook(updatedBook);
 	}
@@ -92,7 +92,7 @@ class SpringDataJdbcApplicationTests {
 			.getResponseBody().collectList().block();
 
 		assertThat(books).isNotEmpty();
-		assertThat(books).allMatch(book -> book.title().toLowerCase().contains("design") || book.author().toLowerCase().contains("design"));
+		assertThat(books).hasSize(2);
 	}
 
 	private void saveAndAssertBook(Book book) {
